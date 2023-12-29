@@ -1,0 +1,70 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $RpyTrendsView : Adw.NavigationPage {
+  title: 'Trends';
+
+  Adw.ToolbarView {
+    [top]
+    Adw.HeaderBar { }
+
+    Gtk.Stack {
+      visible-child-name: bind $state_to_nick(template.view-model as <$RpyViewModel>.state) as <string>;
+
+      Gtk.StackPage {
+        name: 'in-progress';
+        child: Gtk.Spinner {
+          height-request: 32;
+          spinning: true;
+          valign: center;
+        };
+      }
+
+      Gtk.StackPage {
+        name: 'error';
+        child: Gtk.Label {
+          label: 'An error occurred!';
+        };
+      }
+
+      Gtk.StackPage {
+        name: 'success';
+        child: Gtk.ScrolledWindow {
+          hscrollbar-policy: never;
+
+          Adw.ClampScrollable {
+            maximum-size: 1280;
+            tightening-threshold: 768;
+
+            Gtk.GridView {
+              max-columns: 4;
+              single-click-activate: true;
+
+              model: Gtk.NoSelection {
+                model: bind template.view-model as <$RpyTrendsViewModel>.videos;
+              };
+
+              factory: Gtk.BuilderListItemFactory {
+                template Gtk.ListItem {
+                  focusable: false;
+                  child: $RpyVideoCard {
+                    author: bind template.item as <$RpyCommonVideo>.author;
+                    duration: bind template.item as <$RpyCommonVideo>.duration;
+                    publication-date: bind template.item as <$RpyCommonVideo>.publication-date;
+                    thumbnail-uri: bind template.item as <$RpyCommonVideo>.thumbnail-uri;
+                    title: bind template.item as <$RpyCommonVideo>.title;
+                    view-count: bind template.item as <$RpyCommonVideo>.view-count;
+                  };
+                }
+              };
+
+              activate => $open_video();
+
+              styles ['rpy-trends-grid']
+            }
+          }
+        };
+      }
+    }
+  }
+}
